@@ -55,7 +55,7 @@ cond(no)->sub1(left)->op1
 c2(yes)->io->e
 c2(no)->op2->e
 
- ```
+```
 </code></pre>
 
 
@@ -104,7 +104,7 @@ cond(no)->sub1(right)->op1
 
 ## Reference and Thanks
 
-This project learn from:\
+This project learn from:
 
 * [midnightSuyama/gitbook-plugin-flowchart](https://github.com/midnightSuyama/gitbook-plugin-flowchart).
 * [nsdont/gitbook-plugin-new-flowchart](https://github.com/nsdont/gitbook-plugin-new-flowchart).
