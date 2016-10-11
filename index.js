@@ -35,6 +35,9 @@ module.exports = {
       //    end: "```"
       // },
       process: processBlock
+    },
+    flowchart: {
+      process: processBlock
     }
   },
   hooks: {
@@ -57,15 +60,15 @@ module.exports = {
           }     
         }
         // Get all {% flowchart %} and {% endflowchart %}
-        flows = page.content.match(/^{% flowchart %}((.*\n)+?)?{% endflowchart %}$/igm);
-        // Begin replace
-        if (flows instanceof Array) {
-          for (var i = 0, len = flows.length; i < len; i++) {
-            page.content = page.content.replace(
-              flows[i], 
-              flows[i].replace(/^{% flowchart %}/, '{% flow %}').replace(/{% endflowchart %}$/, '{% endflow %}'));
-          }     
-        }
+        // flows = page.content.match(/^{% flowchart %}((.*\n)+?)?{% endflowchart %}$/igm);
+        // // Begin replace
+        // if (flows instanceof Array) {
+        //   for (var i = 0, len = flows.length; i < len; i++) {
+        //     page.content = page.content.replace(
+        //       flows[i], 
+        //       flows[i].replace(/^{% flowchart %}/, '{% flow %}').replace(/{% endflowchart %}$/, '{% endflow %}'));
+        //   }     
+        // }
         return page;
     }
   }
