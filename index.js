@@ -1,61 +1,144 @@
+/*jshint esversion: 8 */
+
 var path = require('path');
-var phantom = require('phantom');
+var puppeteer = require('puppeteer');
 var Q = require('q');
 
 function processBlock(blk) {
-  var deferred = Q.defer();
+    var deferred = Q.defer();
 
-  var book = this;
-  var code = blk.body;
-  var config = book.config.get('pluginsConfig.flow', {});
+    var book = this;
+    var code = blk.body;
+    var config = book.config.get('pluginsConfig.flow', {});
 
-  var width = blk.kwargs['width'];
+    var width = blk.kwargs.width;
+    var height = 'Reserved';
 
-  phantom.create().then(function(ph) {
-    ph.createPage().then(function(page) {
-      var pagePath = path.join(__dirname, 'renderer.html');
-      page.open(pagePath).then(function(status) {
-        var result = page.evaluate(function(code, config, width) {
-          return render(code, config, width);
-        }, code, config, width);
-        ph.exit();
-        deferred.resolve(result);
-      });
-    });
-  });
+    (async (code, config, width, height) => {
+        const browser = await puppeteer.launch({
+            args: ['--disable-dev-shm-usage', '--no-sandbox', '--allow-file-access-from-files', '--enable-local-file-accesses']
+        });
+        const page = await browser.newPage();
 
-  return deferred.promise;
+        const htmlFile = path.join(__dirname, 'renderer.html');
+        await page.goto("file://" + htmlFile, { waitUntil: 'networkidle2' });
+
+        xCode = encodeURIComponent(code);
+        xConfig = encodeURIComponent(JSON.stringify(config));
+        xWidth = encodeURIComponent(width);
+        xHeight = encodeURIComponent(height);
+
+        /* istanbul ignore next */
+        var result = await page.evaluate(
+            `(async() => {
+                        code = decodeURIComponent("${xCode}");
+                        config = JSON.parse(decodeURIComponent("${xConfig}"));
+                        width = decodeURIComponent("${xWidth}");
+                        height = decodeURIComponent("${xHeight}");
+                        return render(code, config, width);
+                 })()`
+        );
+
+        await browser.close();
+
+        return result;
+    })(code, config, width, height).then(
+        function (result) {
+            deferred.resolve(result);
+        }
+    );
+
+    return deferred.promise;
 }
 
 module.exports = {
-  blocks: {
-    flow: {
-      process: processBlock
-    },
-    flowchart: {
-      process: processBlock
-    }
-  },
-  hooks: {
-    // Init plugin and read config
-    "init": function() {
-      if (!Object.keys(this.book.config.get('pluginsConfig.flow', {})).length) {
-        this.book.config.set('pluginsConfig.flow', {});
-      }
-    },
-    // Before parsing markdown
-    "page:before": function(page) {
-      // Get all code texts
-      flows = page.content.match(/^```flow((.*\n)+?)?```$/igm);
-      // Begin replace
-      if (flows instanceof Array) {
-        for (var i = 0, len = flows.length; i < len; i++) {
-          page.content = page.content.replace(
-            flows[i],
-            flows[i].replace(/^```flow/, '{% flow %}').replace(/```$/, '{% endflow %}'));
+    blocks: {
+        flow: {
+            process: processBlock
+        },
+        flowchart: {
+            process: processBlock
         }
-      }
-      return page;
+    },
+    hooks: {
+        // Init plugin and read config
+        "init": function () {
+            if (!Object.keys(this.book.config.get('pluginsConfig.flow', {})).length) {
+                this.book.config.set('pluginsConfig.flow', {});
+            }
+        },
+        // Before parsing markdown
+        "page:before": function (page) {
+            // Get all code texts
+            flows = page.content.match(/^```flow((.*\n)+?)?```$/igm);
+            // Begin replace
+            if (flows instanceof Array) {
+                for (var i = 0, len = flows.length; i < len; i++) {
+                    page.content = page.content.replace(
+                        flows[i],
+                        flows[i]
+                            .replace(/```(\x20|\t)*(flow)[ \t]+{(.*)}/i,
+                                function (matchedStr) {
+                                    if (!matchedStr)
+                                        return "";
+                                    var newStr = "";
+                                    var modeQuote = false;
+                                    var modeArray = false;
+                                    var modeChar = false;
+                                    var modeEqual = false;
+                                    // Trim left and right space
+                                    var str = matchedStr.replace(/^\s+|\s+$/g, "");
+                                    // Remove ```flow header
+                                    str = str.replace(/```(\x20|\t)*(flow)/i, "");
+
+                                    // Build new str
+                                    for (var i = 0; i < str.length; i++) {
+                                        if (str.charAt(i) == "\"") {
+                                            modeQuote = !modeQuote;
+                                            modeChar = true;
+                                            newStr += str.charAt(i);
+                                            continue;
+                                        }
+                                        if (str.charAt(i) == "[") {
+                                            modeArray = true;
+                                            newStr += str.charAt(i);
+                                            continue;
+                                        }
+                                        if (str.charAt(i) == "]") {
+                                            modeArray = false;
+                                            newStr += str.charAt(i);
+                                            continue;
+                                        }
+                                        if (modeQuote || modeArray) {
+                                            // In quote, keep all string
+                                            newStr += str.charAt(i);
+                                        } else {
+                                            // Out of quote, process it
+                                            if (str.charAt(i).match(/[A-Za-z0-9_]/)) {
+                                                modeChar = true;
+                                                newStr += str.charAt(i);
+                                            } else if (str.charAt(i).match(/[=]/)) {
+                                                modeEqual = true;
+                                                modeChar = false;
+                                                newStr += str.charAt(i);
+                                            } else if (modeChar && modeEqual) {
+                                                modeChar = false;
+                                                modeEqual = false;
+                                                newStr += ",";
+                                            }
+                                        }
+                                    }
+
+                                    newStr = newStr.replace(/,$/, "");
+
+                                    return "{% flow " + newStr + " %}";
+                                })
+                            .replace(/```(\x20|\t)*(flow)/i, '{% flow %}')
+                            .replace(/```/, '{% endflow %}')
+                    );
+                }
+            }
+            return page;
+        }
     }
-  }
 };

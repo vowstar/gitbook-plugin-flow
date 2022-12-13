@@ -6,20 +6,28 @@
     "url": "https://github.com/vowstar/gitbook-plugin-flow/issues"
   },
   "dependencies": {
-    "phantom": "^2.0.0",
-    "q": "^1.4.1"
+    "puppeteer": "^19.x",
+    "q": "^1.x"
   },
-  "description": "flowchart.js plugin for GitBook",
-  "devDependencies": {},
+  "description": "flowchart.js plugin for GitBook and Honkit",
+  "devDependencies": {
+    "coveralls": "^3.x",
+    "honkit-tester": "^1.x",
+    "is-svg": "^4.x",
+    "jshint": "^2.x",
+    "mocha": "^10.x",
+    "nyc": "^15.x"
+  },
   "directories": {},
   "engines": {
-    "gitbook": ">=3.0.0"
+    "gitbook": "*"
   },
   "homepage": "https://github.com/vowstar/gitbook-plugin-flow",
   "keywords": [
-    "flowchart",
+    "flowchart.js",
     "flow",
     "plugin",
+    "honkit",
     "gitbook"
   ],
   "license": "MIT",
@@ -36,6 +44,11 @@
     "type": "git",
     "url": "git+https://github.com/vowstar/gitbook-plugin-flow.git"
   },
-  "scripts": {},
-  "version": "1.1.7"
+  "scripts": {
+    "lint": "jshint *.js test/**.js",
+    "pretest": "npm run lint",
+    "test": "nyc --reporter=lcov mocha --reporter spec --timeout 20000",
+    "coverage": "cat ./coverage/lcov.info | coveralls"
+  },
+  "version": "2.0.0"
 }
