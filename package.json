@@ -24,11 +24,11 @@
   },
   "homepage": "https://github.com/vowstar/gitbook-plugin-flow",
   "keywords": [
-    "flowchart.js",
     "flow",
-    "plugin",
-    "honkit",
-    "gitbook"
+    "flowchart.js",
+    "flowchart",
+    "gitbook",
+    "honkit"
   ],
   "license": "MIT",
   "main": "index.js",
@@ -54,5 +54,5 @@
   },
   "flowchartVersion": "1.17.1",
   "raphaelVersion": "2.3.0",
-  "version": "2.0.2"
+  "version": "2.0.3"
 }
