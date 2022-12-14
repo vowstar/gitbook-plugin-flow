@@ -70,7 +70,7 @@ module.exports = {
         // Before parsing markdown
         "page:before": function (page) {
             // Get all code texts
-            flows = page.content.match(/^```flow((.*\n)+?)?```$/igm);
+            flows = page.content.match(/```(\x20|\t)*(flow)((.*[\r\n]+)+?)?```/igm);
             // Begin replace
             if (flows instanceof Array) {
                 for (var i = 0, len = flows.length; i < len; i++) {
