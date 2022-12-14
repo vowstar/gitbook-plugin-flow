@@ -5,9 +5,23 @@
     <script src="assets/raphael.min.js"></script>
     <script src="assets/flowchart.min.js"></script>
     <script>
-      function render(code, options, width) {
+      function sleep(time){
+        return new Promise((resolve) => setTimeout(resolve, time));
+      }
+      async function render(code, options, width) {
         var canvas = document.getElementsByClassName('flowchart')[0];
         flowchart.parse(code).drawSVG(canvas, options);
+
+        var count = 0;
+        while (canvas.childNodes[0].childNodes.length == 0) {
+          count++;
+          if (count >= 600) {
+            console.error("Failed to render chart");
+            return '<svg version="1.1" width="300" height="200" xmlns="http://www.w3.org/2000/svg"><text x="10" y="100" font-size="60" text-anchor="middle">Rendering timed out, please check your input.</text></svg>';
+          }
+          await sleep(100);
+        }
+
         if (width) {
           var svg = canvas.childNodes[0];
           var viewbox_width  = Number(svg.getAttribute('width'));
