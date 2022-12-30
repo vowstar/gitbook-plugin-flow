@@ -44,22 +44,17 @@ book.json add the flowchart.js options
 To include a sequence diagram, just wrap your definition in a "flow" code block. For example:
 
 <pre lang="no-highlight"><code>```flow
-st=>start: Start|past:>http://www.google.com[blank]
-e=>end: End:>http://www.google.com
-| op1=>operation: My Operation    | past    |
-| op2=>operation: Stuff           | current |
-| sub1=>subroutine: My Subroutine | invalid |
+st=>start: Start:>http://www.google.com[blank]
+e=>end:>http://www.google.com
+op1=>operation: My Operation
+sub1=>subroutine: My Subroutine
 cond=>condition: Yes
-| or No?                              | approved:>http://www.google.com |
-| c2=>condition: Good idea            | rejected                        |
-| io=>inputoutput: catch something... | request                         |
+or No?:>http://www.google.com
+io=>inputoutput: catch something...
 
-st->op1(right)->cond
-cond(yes, right)->c2
-cond(no)->sub1(left)->op1
-c2(yes)->io->e
-c2(no)->op2->e
-
+st->op1->cond
+cond(yes)->io->e
+cond(no)->sub1(right)->op1
 ```
 </code></pre>
 
@@ -104,6 +99,18 @@ cond(no)->sub1(right)->op1
 
 ```bash
 {% flow width=770 %}
+st=>start: Start:>http://www.google.com[blank]
+e=>end:>http://www.google.com
+op1=>operation: My Operation
+sub1=>subroutine: My Subroutine
+cond=>condition: Yes
+or No?:>http://www.google.com
+io=>inputoutput: catch something...
+
+st->op1->cond
+cond(yes)->io->e
+cond(no)->sub1(right)->op1
+{% endflow %}
 ```
 
 ## Thanks
