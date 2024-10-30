@@ -6,17 +6,16 @@
     "url": "https://github.com/vowstar/gitbook-plugin-flow/issues"
   },
   "dependencies": {
-    "puppeteer": "^19.x",
-    "q": "^1.x"
+    "puppeteer": "^23.x"
   },
   "description": "flowchart.js plugin for GitBook and Honkit",
   "devDependencies": {
-    "coveralls": "^3.x",
-    "honkit-tester": "^1.x",
-    "is-svg": "^4.x",
+    "codecov": "^3.x",
+    "honkit-tester": "^2.x",
+    "is-svg": ">=4.0.0 <5.0.0",
     "jshint": "^2.x",
     "mocha": "^10.x",
-    "nyc": "^15.x"
+    "nyc": "^17.x"
   },
   "directories": {},
   "engines": {
@@ -47,12 +46,11 @@
   "scripts": {
     "lint": "jshint *.js test/**.js scripts/**.js",
     "prepublish": "node scripts/get-assets.js",
-    "postinstall": "node scripts/get-assets.js",
     "pretest": "npm run lint",
     "test": "nyc --reporter=lcov mocha --reporter spec --timeout 20000",
-    "coverage": "cat ./coverage/lcov.info | coveralls"
+    "coverage": "nyc report --reporter=text-lcov | codecov"
   },
-  "flowchartVersion": "1.17.1",
+  "flowchartVersion": "1.18.0",
   "raphaelVersion": "2.3.0",
-  "version": "2.0.8"
+  "version": "3.0.0"
 }
